@@ -1,249 +1,224 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width">
-    <title>
-        Ahmed Ali mohamned
-    </title> 
-    <div id="header"><u>ابراهيم محمد السيد الفقي</u></div>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Egypt Weather Now - رادار طقس مصر</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
-     h1 {text-align:center;}
+        :root { 
+            --primary: #00d2ff; --dark-bg: #080a0c; --card-bg: #12161a; 
+            --success: #00ff00; --danger: #ff4757; --coastal: #2ecc71;
+        }
+
+        body { 
+            font-family: 'Cairo', sans-serif; margin: 0; background: var(--dark-bg); 
+            color: white; overflow-x: hidden; 
+        }
+
+        /* الهيدر المركزي */
+        .main-header {
+            background: linear-gradient(to bottom, #1a1f24, #12161a);
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid #333;
+        }
+        .main-header h1 {
+            margin: 0; font-size: 2.8rem; color: var(--primary);
+            text-transform: uppercase; letter-spacing: 3px; font-weight: 900;
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+        }
+        .main-header p { margin: 5px 0 0; font-size: 1rem; color: #888; }
+
+        /* شريط الإحصائيات */
+        .stats-bar { 
+            background: #1a1f24; display: flex; justify-content: space-around; padding: 12px; 
+            border-bottom: 2px solid #2d3436; font-size: 0.9rem; position: sticky; top: 0; z-index: 1000; 
+        }
+
+        .container { 
+            max-width: 1450px; margin: 20px auto; padding: 0 15px; 
+            display: flex; flex-wrap: wrap; gap: 20px; 
+        }
+
+        #map { 
+            flex: 2; height: 600px; min-width: 350px; border-radius: 30px; 
+            border: 2px solid #34495e; box-shadow: 0 15px 40px rgba(0,0,0,0.8); 
+        }
+
+        .sidebar { flex: 1; min-width: 330px; display: flex; flex-direction: column; gap: 15px; }
+
+        select { 
+            width: 100%; padding: 14px; border-radius: 12px; background: #1e2329; 
+            color: white; border: 2px solid #333; font-family: inherit; outline: none; 
+        }
+
+        /* صندوق الطقس */
+        .weather-box { 
+            position: relative; overflow: hidden; background: var(--card-bg); 
+            padding: 30px; border-radius: 30px; text-align: center; 
+            border: 1px solid #2d3436; min-height: 420px; 
+            display: flex; flex-direction: column; justify-content: center; transition: 0.5s;
+        }
+
+        .hot-effect { background: radial-gradient(circle, rgba(255, 69, 0, 0.2) 0%, transparent 70%); border-color: #ff4500; }
+        .cold-effect { background: radial-gradient(circle, rgba(0, 210, 255, 0.15) 0%, transparent 70%); border-color: var(--primary); }
+
+        .coastal-tag { 
+            position: absolute; top: 15px; right: 15px; background: var(--coastal); 
+            color: black; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; 
+        }
+
+        .temp-main { 
+            font-size: 6rem; font-weight: 900; background: linear-gradient(#fff, var(--primary)); 
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+        }
+
+        .btn-group { display: flex; gap: 10px; }
+        .gps-btn { flex: 2; padding: 15px; border-radius: 12px; background: var(--primary); border: none; font-weight: bold; cursor: pointer; font-family: inherit; }
+        .csv-btn { flex: 1; background: #27ae60; color: white; border: none; border-radius: 12px; cursor: pointer; display: none; font-weight: bold; }
+
+        .radar-pulse { border: 3px solid var(--primary); border-radius: 50%; animation: radar 1.5s infinite ease-out; position: absolute; pointer-events: none; }
+        @keyframes radar { 0% { transform: scale(0.1); opacity: 1; } 100% { transform: scale(4); opacity: 0; } }
     </style>
-    <link rel="stylesheet" href="style.CSS">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
 </head>
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
-    <div class="row">
-        <div class="col-xxl-4 col-xl-6  col-m-12">
-            <div class="card" style="width: 18rem;">
-                <img src="../New folder/maxresdefault1.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                  <h5 class="card-title">hello</h5>
-                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                  <a href="#" class="btn btn-primary">Go somewhere</a>
-                </div>
-              </div>
-        </div>
-        <div class="col-xxl-4 col-xl-6  col-m-12">
-            <div class="card" style="width: 18rem;">
-                <img src="../New folder/maxresdefault2.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                  <h5 class="card-title">hello</h5>
-                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                  <a href="#" class="btn btn-primary">Go somewhere</a>
-                </div>
-              </div>
-        </div>
-        <div class="col-xxl-4 col-l-6  col-m-12">
-            <div class="card" style="width: 18rem;">
-                <img src="../New folder/اقوال-الدكتور-ابراهيم-الفقي-1024x5763.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                  <h5 class="card-title">hello</h5>
-                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                  <a href="#" class="btn btn-primary">Go somewhere</a>
-                </div>
-              </div>
-        </div>
-      </div>
-  <img style="display:block;margin-left:auto;margin-right:auto;" src="../New folder/OIP22.jpg"
-    width="400" height="400">
- <br>
-<video style="display:block;margin-left:auto;margin-right:auto;" src="../New folder/videoplayback.mp4 " width="1000" height="500" 
-    controls  autoplay >
-</video>
-    <br>
-    <h2> فيديوهات خاص د.ابراهيم</h2>
-    <div class="btn-group">
-        <a href="https://www.bing.com/ck/a?!&&p=eae0a604837d08f4f2395abedbc8e20dc76633aab093932b31158294d9820392JmltdHM9MTc0NTQ1MjgwMA&ptn=3&ver=2&hsh=4&fclid=07fb022e-78c4-640f-0c44-115879b865bd&psq=%d8%a7%d8%a8%d8%b1%d8%a7%d9%87%d9%8a%d9%85+%d8%a7%d9%84%d9%81%d9%82%d9%8a&u=a1aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g_dj1TbXFlMTdod3ptRQ&ntb=1" class="btn btn-primary active" aria-current="page" target="_blank">video (1)</a>
-        <a href="https://www.bing.com/ck/a?!&&p=b14fbb768adffeaf2472da10b3d920fb156fe19608aca870676bbbbf39acfa8aJmltdHM9MTc0NTQ1MjgwMA&ptn=3&ver=2&hsh=4&fclid=07fb022e-78c4-640f-0c44-115879b865bd&u=a1L3ZpZGVvcy9yaXZlcnZpZXcvcmVsYXRlZHZpZGVvP3E9JWQ4JWE3JWQ4JWE4JWQ4JWIxJWQ4JWE3JWQ5JTg3JWQ5JThhJWQ5JTg1KyVkOCVhNyVkOSU4NCVkOSU4MSVkOSU4MiVkOSU4YSYmbWlkPTk4MTQxQjkxRjQwM0VCMDE5NkEwOTgxNDFCOTFGNDAzRUIwMTk2QTAmRk9STT1WQU1HWkM&ntb=1" class="btn btn-primary" target="_blank">video (2)</a>
-        <a href="https://www.bing.com/ck/a?!&&p=efce3d460ff11c4c5de764651f05c5061250170706ca80795d1a2438aadb1073JmltdHM9MTc0NTQ1MjgwMA&ptn=3&ver=2&hsh=4&fclid=07fb022e-78c4-640f-0c44-115879b865bd&u=a1L3ZpZGVvcy9yaXZlcnZpZXcvcmVsYXRlZHZpZGVvP3E9JWQ4JWE3JWQ4JWE4JWQ4JWIxJWQ4JWE3JWQ5JTg3JWQ5JThhJWQ5JTg1KyVkOCVhNyVkOSU4NCVkOSU4MSVkOSU4MiVkOSU4YSYmbWlkPUIxQkY1MUQ5QkJBNjZCOTNFOTU3QjFCRjUxRDlCQkE2NkI5M0U5NTcmRk9STT1WQU1HWkM&ntb=1" class="btn btn-primary" target="_blank">video (3)</a>
-      </div>
-    <hr>
-    <details>
-        <summary>
-<b>
-    نبذه
-</b>
-        </summary>
-       <b><a>
-        (5 أغسطس 1950 - 10 فبرا  ير 2012)، خبير التنمية البشرية والبرمجة اللغوية العصبية ورئيس مجلس إدارة المركز الكندي للتنمية البشرية، ومُؤسس ورئيس مجلس إدارة مجموعة شركات إبراهيم الفقي العالمية التي تتكون من (المركز الكندي لقوة الطاقة البشرية، المركز الكندي للتنويم بالإحياء، المركز الكندي للتنمية البشرية، المركز الكندي البرمجة اللغوية والعصبية). له مؤلفات تُرجمت إلى عدة لغات. درب أكثر من 600 ألف شخص في محاضراته حول العالم. من مؤلفاته: (إدارة الوقت، المفاتيح العشرة للنجاح).
-ولد إبراهيم محمد السيد الفقي في حي فيكتوريا بمدينة الإسكندرية، حصل على بطولة مصر في تنس الطاولة لعدة سنوات ومَثَّلَ مصر مع المنتخب الوطني في بطولة العالم لتنس الطاولة بألمانيا الغربية عام 1969. وفي الحياة المهنية فقد تدرج الفقي في الوظائف حتى درجة مدير قسم في قطاع الفنادق بفندق فلسطين بالإسكندرية ووصل إلى الدرجة الثالثة وهو في سن الخامسة والعشرين. هاجر إلى كندا لدراسة الإدارة، وبدأ هناك في وظيفة عامل تنظيف الأطباق وفي وظيفة حارس لمطعم وحمال كراسي ومنظف طاولات في فندق.
-    </a></b> 
-        
-    </details>
-    <br>
-    <details>
-        <summary>
-<b>
-    اهم مؤلفاته:.
-</b>
-        </summary>
-       <b><a>
-        
-للفقي عدة مؤلفات ترجم بعضها إلى الإنجليزية، الفرنسية، العربية، الكردية والأندونيسية وله عدة كتب متوفرة في المكتبة والأرشيف الوطني لكندا عبارة عن عشرة عناوين كلها نشرت خلال التسعينيات من القرن الماضي، تدرجت مواضيعها زمنياً من تناول تقنيات البيع مروراً بفن التدبير الناجح ووصولاً إلى الكتابة عن التطوير الذاتي والنجاح عمومًا، من أبرز كتبه
-<ul type="disc">
-<li> كتاب الطريق إلى الامتياز، طبعت سنة 2016</li> 
-<Li>  قوة التفكير</Li>
-<li>البرمجة اللغوية العصبية وفن الاتصال اللامحدود</li>
-<li>المفاتيح العشرة للنجاح<li>
-    قوة التحكم في الذات
-</ul>
 
-<button style="display: block;margin-left:auto;margin-right:auto;"><a href="https://www.bing.com/ck/a?!&&p=784bfad11d72bc865e6ef25014221340c7ff2c56a41b123b8936221d37ae4147JmltdHM9MTc0NTE5MzYwMA&ptn=3&ver=2&hsh=4&fclid=07fb022e-78c4-640f-0c44-115879b865bd&psq=%d8%a7%d8%a8%d8%b1%d8%a7%d9%87%d9%8a%d9%85+%d8%a7%d9%84%d9%81%d9%82%d9%8a&u=a1aHR0cHM6Ly9hci53aWtpcGVkaWEub3JnL3dpa2kvJUQ4JUE1JUQ4JUE4JUQ4JUIxJUQ4JUE3JUQ5JTg3JUQ5JThBJUQ5JTg1XyVEOCVBNyVEOSU4NCVEOSU4MSVEOSU4MiVEOSU4QQ&ntb=1" target="_blank"><b> المزيـــــــــــد</b></a> 
-</button>
-        
-    </a></b> 
-        
-    </details>
+    <header class="main-header">
+        <h1>Egypt Weather Now</h1>
+        <p>منظومة الرصد الجوي المباشر للمحافظات المصرية</p>
+    </header>
 
- <details>
-    <summary>
-<b>
-وفاته
-</b>
-    </summary>
-    يوم الجمعة 10 فبراير 2012 صباحاً، وجد إبراهيم الفقي وشقيقته، وكذلك سيدة أخرى من العائلة (تعمل مربية أطفال) ماتوا اختناقاً إثر اندلاع حريق هائل بالشقة التي يقيم بها. وقد نشب الحريق في مركز إبراهيم الفقي للتنمية البشرية بالطابق الثالث وامتد لباقي أدوار العقار الذي يمتلكه الفقي ويقيم به مما أدى إلى وفاته وشقيقته فوقية محمد الفقي (62 سنة) والسيدة الأخرى التي كانت تقيم معهم وتدعى نوال
- </details> 
- <br>
-  <h1 style="text-align:center;">
-    <u>من أقواله</u>
-    <br>
- 	ابتعد عن الأشخاص الذين يحاولون التقليل من طموحاتك بينما الناس العظماء هم الذين يشعرونك أنك باستطاعتك أن تصبح واحداً منهم
-  </h1>
-
-<hr>
-<!----------............---------------------other-------------....------------------............---------------...........------------->
-<br>
-
-<table>
-<caption>landsat earth</caption>
-<tr>
-<th>sensor</th>
-<th>platform</th>
-<th>apectrum</th>
-</tr>
-
-<tr>
-<td>mss</td>
-<td>landsat1-5</td>
-<td>vnir</td>
-</tr>
-<tr>
-    <td>tm</td>
-    <td>landsat4-5</td>
-    <td>vnir&tir</td>
-</tr>
-<tr>
-    <td>tm</td>
-    <td>landsat4-5</td>
-    <td>vnir&tir</td>
-</tr>
-</table>
-<style>
-    table{border - collapse: collapse; }
-
-td,th {border:solid black 3px;padding:10px;}
-</style>
-<br>
-<FORM>
-    <label for="text">
-     USER NAME
-  </label>
- 
-     <input type="text" id="text"  size="30" placeholder="Ahmed_dewedar">
-     <br>
-     
-     <label for="text">
-         YourPhone
-      </label>
-     
-         <input type="number" id="text"  size="30" required><br>
- 
-         <hr>
- 
-         <label for="notes">
-             notes
-          </label>
-          <textarea name="text" id="notes" cols="30" rows="10"> Dewedar
- 
-          </textarea>
-          <br>
-
-          <h5> radio button</h5>
-          <p>
-              المستوي الدراسي
-          </p>
-          <form>
-          <label for="1">المستوي الاول</label>
-          <input type="checkbox" id="1">
-          <br>
-          <label for="2">المستوي الثاني</label>
-          <input type="checkbox" id="2">
-       </FORM>
-
-<br>
-<h2 > what is your birth month</h2> 
-<label for="month">Month:</label>
- <select name="month" id="month">
-<option value="january">January</option>
-<option value="february">February</option>
-<option value="march">March</option>
-<option value="april">April</option>
-<option value="may">May</option>
-<option value="june" >June</option>
-<option value="july">July</option>
-<option value="august">August</option>
-<option value="september" >September</option> 
-<option value="october"> October</option>
-<option value="november" >November</option>
-<option value="december">December</option>
-</select>
-<br>
-
- <div id="Geomatics">
-    <h1>Geomatics</h1>
-    <p>............topic.................................................
-    </p>
-    <div class="sub">
-      <h3>Gis</h3>
-      <img src="../New folder/gis.jpg" width="88%">
-      <p>
-        Ahmed Dewedarr    </p>
+    <div class="stats-bar">
+        <div>📡 الرصد: <span style="color:var(--success)">نشط</span></div>
+        <div>🛰️ الأقمار: <span style="color:var(--primary)">متصلة</span></div>
+        <div>🕒 <span id="liveClock">--:--:--</span></div>
     </div>
-    <div class="sub">
-      <h3>Remote Sensing</h3>
-      <img src="../New folder/Romate.jpg" width="94%">
-      <p>
-        Ahmed Dewedarr
-         </p>
+
+    <div class="container">
+        <div class="sidebar">
+            <select id="govSelect" onchange="handleSelect()">
+                <option value="">-- اختر محافظة (27 محافظة) --</option>
+            </select>
+
+            <div class="btn-group">
+                <button class="gps-btn" onclick="getLocation()">📍 موقعي الحالي</button>
+                <button id="csvBtn" class="csv-btn" onclick="downloadCSV()">CSV 📥</button>
+            </div>
+            
+            <div class="weather-box" id="weatherDisplay">
+                <div style="opacity: 0.5;">في انتظار اختيار منطقة للتحليل...</div>
+            </div>
+        </div>
+        
+        <div id="map"></div>
     </div>
-    <div class="sub">
-      <h3>surveying</h3>
-      <img src="../New folder/surveing.jpg" width="90%">
-      <p>
-        Ahmed Dewedarr
-        </p>
-    </div>
-    <br>
-</dl>
-<h3>
-    what is your speciality in geography
-</h3>
-<dt>PHYSICAL GEOGRAPHY</dt>
-    <dd>- climatology</dd>
-    <dd>- hydrology</dd>
-    <dd>- biogeography</dd>
-<br>
-<dt>HUMAN GEOGRAPHY</dt>
-<dd>- cultural geography</dd>
-<dd>- political geography </dd>
-    <dd>- historical geography</dd>
-    <dd>- urban geography</dd>
-    <dd>- economic geography</dd>
-     <dd>- population geography</dd>
-</dl>
- 
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const API_KEY = "ee1bb6ea81434e09a3233509251812";
+        let lastData = null;
+        let currentMarker, pulseMarker;
+
+        const governorates = [
+            { name: "القاهرة", lat: 30.0444, lon: 31.2357, coastal: false },
+            { name: "الإسكندرية", lat: 31.2001, lon: 29.9187, coastal: true },
+            { name: "الجيزة", lat: 30.0131, lon: 31.2089, coastal: false },
+            { name: "الدقهلية", lat: 31.0364, lon: 31.3532, coastal: true },
+            { name: "البحر الأحمر", lat: 27.2579, lon: 33.8116, coastal: true },
+            { name: "البحيرة", lat: 31.0333, lon: 30.4667, coastal: true },
+            { name: "الفيوم", lat: 29.3084, lon: 30.8428, coastal: false },
+            { name: "الغربية", lat: 30.8333, lon: 31.0000, coastal: false },
+            { name: "الإسماعيلية", lat: 30.6043, lon: 32.2723, coastal: true },
+            { name: "المنوفية", lat: 30.5972, lon: 30.9876, coastal: false },
+            { name: "المنيا", lat: 28.1091, lon: 30.7503, coastal: false },
+            { name: "القليوبية", lat: 30.4100, lon: 31.2100, coastal: false },
+            { name: "الوادي الجديد", lat: 25.4514, lon: 30.5461, coastal: false },
+            { name: "الشرقية", lat: 30.7327, lon: 31.7195, coastal: false },
+            { name: "السويس", lat: 29.9667, lon: 32.5333, coastal: true },
+            { name: "أسوان", lat: 24.0889, lon: 32.8998, coastal: false },
+            { name: "أسيوط", lat: 27.1783, lon: 31.1859, coastal: false },
+            { name: "بني سويف", lat: 29.0661, lon: 31.0994, coastal: false },
+            { name: "بورسعيد", lat: 31.2565, lon: 32.2841, coastal: true },
+            { name: "دمياط", lat: 31.4175, lon: 31.8144, coastal: true },
+            { name: "جنوب سيناء", lat: 28.5000, lon: 34.0000, coastal: true },
+            { name: "كفر الشيخ", lat: 31.1107, lon: 30.9388, coastal: true },
+            { name: "مطروح", lat: 31.3543, lon: 27.2373, coastal: true },
+            { name: "قنا", lat: 26.1551, lon: 32.7160, coastal: false },
+            { name: "شمال سيناء", lat: 30.5000, lon: 33.5000, coastal: true },
+            { name: "سوهاج", lat: 26.5591, lon: 31.6957, coastal: false },
+            { name: "الأقصر", lat: 25.6872, lon: 32.6396, coastal: false }
+        ].sort((a,b) => a.name.localeCompare(b.name, 'ar'));
+
+        const selectEl = document.getElementById('govSelect');
+        governorates.forEach((g, i) => selectEl.add(new Option(g.name, i)));
+
+        const map = L.map('map', { zoomControl: false }).setView([26.8, 30.8], 6);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+        setInterval(() => { 
+            document.getElementById('liveClock').innerText = new Date().toLocaleTimeString('ar-EG'); 
+        }, 1000);
+
+        function handleSelect() {
+            const g = governorates[selectEl.value];
+            if (g) updateUI(g.lat, g.lon, g.name, g.coastal);
+        }
+
+        map.on('click', e => updateUI(e.latlng.lat, e.latlng.lng, "رصد يدوي", false));
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(p => updateUI(p.coords.latitude, p.coords.longitude, "موقعي", false));
+            }
+        }
+
+        async function fetchWeather(lat, lon, label, isCoastal) {
+            const display = document.getElementById('weatherDisplay');
+            try {
+                const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${lat},${lon}&lang=ar`);
+                const data = await res.json();
+                lastData = { name: label, ...data };
+                
+                const temp = data.current.temp_c;
+                let tempClass = temp > 30 ? 'hot-effect' : (temp < 18 ? 'cold-effect' : '');
+
+                display.className = `weather-box ${tempClass}`;
+                display.innerHTML = `
+                    ${isCoastal ? '<div class="coastal-tag">🌊 منطقة ساحلية</div>' : ''}
+                    <h2 style="margin:0;">${label}</h2>
+                    <div class="temp-main">${Math.round(temp)}°</div>
+                    <p style="font-weight:bold; color:var(--primary); font-size:1.3rem;">${data.current.condition.text}</p>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top:15px; font-size:0.9rem;">
+                        <div>💧 رطوبة: ${data.current.humidity}%</div>
+                        <div>💨 رياح: ${data.current.wind_kph} ك/س</div>
+                    </div>
+                `;
+                document.getElementById('csvBtn').style.display = 'block';
+            } catch (e) { display.innerHTML = "فشل الرصد"; }
+        }
+
+        function updateUI(lat, lon, label, isCoastal) {
+            if (currentMarker) map.removeLayer(currentMarker);
+            if (pulseMarker) map.removeLayer(pulseMarker);
+            currentMarker = L.circleMarker([lat, lon], { radius: 10, color: '#fff', fillColor: '#00d2ff', fillOpacity: 1 }).addTo(map);
+            pulseMarker = L.marker([lat, lon], { icon: L.divIcon({ className: 'radar-pulse', iconSize: [20, 20] }) }).addTo(map);
+            map.flyTo([lat, lon], 9);
+            fetchWeather(lat, lon, label, isCoastal);
+        }
+
+        function downloadCSV() {
+            if (!lastData) return;
+            const content = `\uFEFFالمحافظة,الحرارة,الحالة,الرطوبة,الرياح\n${lastData.name},${lastData.current.temp_c},${lastData.current.condition.text},${lastData.current.humidity}%,${lastData.current.wind_kph}km/h`;
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `طقس_مصر_${lastData.name}.csv`;
+            a.click();
+        }
+    </script>
 </body>
 </html>
